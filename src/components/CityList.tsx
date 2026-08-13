@@ -9,6 +9,15 @@ interface CityListProps {
 }
 
 export function CityList({ probabilities }: CityListProps) {
+  const sectionCount = probabilities.reduce(
+    (max, p) =>
+      p.cardsBySection.reduce(
+        (m, s) => Math.max(m, s.sectionIndex + 1),
+        max
+      ),
+    0
+  );
+
   const grouped = COLOR_ORDER.reduce(
     (acc, color) => {
       const cities = probabilities
@@ -41,7 +50,12 @@ export function CityList({ probabilities }: CityListProps) {
             </h3>
             <div className="flex flex-col">
               {cities.map((city) => (
-                <CityRow key={city.cityId} city={city} totalCards={totalCards} />
+                <CityRow
+                  key={city.cityId}
+                  city={city}
+                  totalCards={totalCards}
+                  sectionCount={sectionCount}
+                />
               ))}
             </div>
           </div>
