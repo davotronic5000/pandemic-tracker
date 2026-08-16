@@ -57,8 +57,8 @@ export function useGameState() {
   );
 
   const handleEpidemic = useCallback(
-    (bottomCardCityId: string) => {
-      setGameState((prev) => epidemic(prev, bottomCardCityId));
+    (bottomCardCityId: string, cardsToRemove: string[] = []) => {
+      setGameState((prev) => epidemic(prev, bottomCardCityId, cardsToRemove));
     },
     [setGameState]
   );

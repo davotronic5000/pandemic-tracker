@@ -36,6 +36,7 @@ export type GameAction =
       bottomCardCityId: string;
       newSectionId: string;
       previousDiscardPile: string[];
+      removedCardIds: string[];
     }
   | { type: "REMOVE_CARD"; cityId: string };
 

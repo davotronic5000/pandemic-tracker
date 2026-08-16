@@ -11,8 +11,9 @@ export function NewGameDialog({ onConfirm, onClose }: NewGameDialogProps) {
       <div className="bg-white rounded-2xl w-full max-w-sm m-4 p-6">
         <h2 className="text-lg font-bold mb-2">Start New Game?</h2>
         <p className="text-sm text-gray-600 mb-6">
-          This will reset the current game. Your city configuration will be
-          preserved.
+          This will reset the current game and start the Infect Step of
+          setup, where you&apos;ll draw 9 cards from the infection deck. Your
+          city configuration will be preserved.
         </p>
         <div className="flex gap-3">
           <button

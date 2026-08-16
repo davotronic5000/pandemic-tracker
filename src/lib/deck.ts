@@ -104,7 +104,8 @@ export function drawCard(state: GameState, cityId: string): GameState {
 
 export function epidemic(
   state: GameState,
-  bottomCardCityId: string
+  bottomCardCityId: string,
+  cardsToRemove: string[] = []
 ): GameState {
   const bottomSectionIndex = state.sections.length - 1;
   if (bottomSectionIndex < 0) return state;
@@ -121,10 +122,23 @@ export function epidemic(
 
   const discardWithBottom = [bottomCardCityId, ...state.discardPile];
 
+  const stillToRemove = [...cardsToRemove];
+  const keptDiscard: string[] = [];
+  const removedCardIds: string[] = [];
+  for (const cityId of discardWithBottom) {
+    const idx = stillToRemove.indexOf(cityId);
+    if (idx !== -1) {
+      stillToRemove.splice(idx, 1);
+      removedCardIds.push(cityId);
+    } else {
+      keptDiscard.push(cityId);
+    }
+  }
+
   const newSectionId = crypto.randomUUID();
   const newTopSection: DeckSection = {
     id: newSectionId,
-    cards: discardWithBottom.map((cityId) => ({ cityId })),
+    cards: keptDiscard.map((cityId) => ({ cityId })),
     drawnFromHere: [],
   };
 
@@ -140,12 +154,14 @@ export function epidemic(
     bottomCardCityId,
     newSectionId,
     previousDiscardPile: [...state.discardPile],
+    removedCardIds,
   };
 
   return {
     ...state,
     sections: newSections,
     discardPile: [],
+    removedCards: [...state.removedCards, ...removedCardIds],
     epidemicCount: state.epidemicCount + 1,
     history: [...state.history, action],
   };
@@ -182,7 +198,7 @@ export function undoLastAction(state: GameState): GameState {
       if (discardIdx !== -1) newDiscard.splice(discardIdx, 1);
 
       let sectionFound = false;
-      let newSections = state.sections.map((s) => {
+      const newSections = state.sections.map((s) => {
         if (s.id !== sectionId) return s;
         sectionFound = true;
         const drawnIdx = s.drawnFromHere.lastIndexOf(cityId);
@@ -232,7 +248,7 @@ export function undoLastAction(state: GameState): GameState {
     }
 
     case "EPIDEMIC": {
-      const { bottomCardCityId, newSectionId, previousDiscardPile } =
+      const { bottomCardCityId, newSectionId, previousDiscardPile, removedCardIds } =
         lastAction;
 
       const newSections = state.sections
@@ -265,10 +281,17 @@ export function undoLastAction(state: GameState): GameState {
         }
       }
 
+      const newRemoved = [...state.removedCards];
+      for (const cityId of removedCardIds) {
+        const idx = newRemoved.lastIndexOf(cityId);
+        if (idx !== -1) newRemoved.splice(idx, 1);
+      }
+
       return {
         ...state,
         sections: finalSections.length > 0 ? finalSections : newSections,
         discardPile: previousDiscardPile,
+        removedCards: newRemoved,
         epidemicCount: state.epidemicCount - 1,
         history: newHistory,
       };

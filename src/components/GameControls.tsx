@@ -10,6 +10,7 @@ import { RemovedCards } from "./RemovedCards";
 import { NewGameDialog } from "./NewGameDialog";
 import { CityConfigModal } from "./CityConfigModal";
 import { getTotalCardsInDeck } from "../lib/deck";
+import { INITIAL_SETUP_DRAW_COUNT } from "../lib/constants";
 
 interface GameControlsProps {
   gameState: GameState;
@@ -19,7 +20,7 @@ interface GameControlsProps {
   canUndo: boolean;
   lastAction: GameAction | null;
   onDrawCard: (cityId: string) => void;
-  onEpidemic: (bottomCardCityId: string) => void;
+  onEpidemic: (bottomCardCityId: string, cardsToRemove?: string[]) => void;
   onRemoveCard: (cityId: string) => void;
   onUndo: () => void;
   onNewGame: () => void;
@@ -44,7 +45,9 @@ export function GameControls({
   const [showEpidemic, setShowEpidemic] = useState(false);
   const [showNewGame, setShowNewGame] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [showInitialSetup, setShowInitialSetup] = useState(false);
   const [cardsDrawnThisTurn, setCardsDrawnThisTurn] = useState(0);
+  const [initialSetupDrawn, setInitialSetupDrawn] = useState(0);
 
   const totalCards = getTotalCardsInDeck(gameState);
 
@@ -56,6 +59,17 @@ export function GameControls({
       setShowDraw(false);
     } else {
       setCardsDrawnThisTurn(newDrawn);
+    }
+  };
+
+  const handleInitialSetupDraw = (cityId: string) => {
+    onDrawCard(cityId);
+    const newDrawn = initialSetupDrawn + 1;
+    if (newDrawn >= INITIAL_SETUP_DRAW_COUNT) {
+      setInitialSetupDrawn(0);
+      setShowInitialSetup(false);
+    } else {
+      setInitialSetupDrawn(newDrawn);
     }
   };
 
@@ -154,12 +168,24 @@ export function GameControls({
       {showDraw && (
         <DrawCardModal
           probabilities={probabilities}
-          infectionRate={infectionRate}
-          cardsDrawnThisTurn={cardsDrawnThisTurn}
+          remaining={infectionRate - cardsDrawnThisTurn}
           onDraw={handleDraw}
           onClose={() => {
             setShowDraw(false);
             setCardsDrawnThisTurn(0);
+          }}
+        />
+      )}
+
+      {showInitialSetup && (
+        <DrawCardModal
+          probabilities={probabilities}
+          remaining={INITIAL_SETUP_DRAW_COUNT - initialSetupDrawn}
+          title="Infect Step: Initial Setup"
+          onDraw={handleInitialSetupDraw}
+          onClose={() => {
+            setShowInitialSetup(false);
+            setInitialSetupDrawn(0);
           }}
         />
       )}
@@ -175,7 +201,11 @@ export function GameControls({
 
       {showNewGame && (
         <NewGameDialog
-          onConfirm={onNewGame}
+          onConfirm={() => {
+            onNewGame();
+            setInitialSetupDrawn(0);
+            setShowInitialSetup(true);
+          }}
           onClose={() => setShowNewGame(false)}
         />
       )}

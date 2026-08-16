@@ -18,11 +18,11 @@ export function CityList({ probabilities }: CityListProps) {
     0
   );
 
+  // Cities keep the order from the campaign configuration (not sorted by
+  // probability) so rows don't reshuffle as probabilities update mid-game.
   const grouped = COLOR_ORDER.reduce(
     (acc, color) => {
-      const cities = probabilities
-        .filter((p) => p.color === color)
-        .sort((a, b) => b.probability - a.probability);
+      const cities = probabilities.filter((p) => p.color === color);
       if (cities.length > 0) acc[color] = cities;
       return acc;
     },

@@ -146,9 +146,6 @@ describe("epidemic", () => {
     let state = createInitialDeck(testConfig);
     state = drawCard(state, "new-york");
 
-    const bottomBefore = getSectionRemainingCount(
-      state.sections[state.sections.length - 1]
-    );
     state = epidemic(state, "cairo");
 
     const bottomSection = state.sections[state.sections.length - 1];
@@ -170,6 +167,45 @@ describe("epidemic", () => {
     const state = createInitialDeck(testConfig);
     const newState = epidemic(state, "nonexistent");
     expect(newState).toBe(state);
+  });
+
+  it("removes specified cards from the discard pile before shuffling", () => {
+    let state = createInitialDeck(testConfig);
+    state = drawCard(state, "new-york");
+    state = drawCard(state, "london");
+
+    state = epidemic(state, "cairo", ["new-york"]);
+
+    expect(state.removedCards).toEqual(["new-york"]);
+    const topSection = state.sections[0];
+    const topCityIds = topSection.cards.map((c) => c.cityId).sort();
+    expect(topCityIds).toEqual(["cairo", "london"]);
+  });
+
+  it("can remove the newly drawn bottom card itself", () => {
+    let state = createInitialDeck(testConfig);
+    state = drawCard(state, "new-york");
+
+    state = epidemic(state, "cairo", ["cairo"]);
+
+    expect(state.removedCards).toEqual(["cairo"]);
+    const topSection = state.sections[0];
+    const topCityIds = topSection.cards.map((c) => c.cityId);
+    expect(topCityIds).toEqual(["new-york"]);
+  });
+
+  it("undo restores discard pile and removed cards", () => {
+    let state = createInitialDeck(testConfig);
+    state = drawCard(state, "new-york");
+    state = drawCard(state, "london");
+    const beforeEpidemic = state;
+
+    state = epidemic(state, "cairo", ["new-york"]);
+    state = undoLastAction(state);
+
+    expect(state.discardPile).toEqual(beforeEpidemic.discardPile);
+    expect(state.removedCards).toEqual(beforeEpidemic.removedCards);
+    expect(state.epidemicCount).toBe(beforeEpidemic.epidemicCount);
   });
 });
 
@@ -203,7 +239,6 @@ describe("removeCard", () => {
 describe("undoLastAction", () => {
   it("undoes a draw card", () => {
     let state = createInitialDeck(testConfig);
-    const original = state;
     state = drawCard(state, "new-york");
     state = undoLastAction(state);
 

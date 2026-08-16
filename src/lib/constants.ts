@@ -14,6 +14,8 @@ export const DEFAULT_CITIES: CityDefinition[] = [
 
 export const DEFAULT_CARDS_PER_CITY = 3;
 
+export const INITIAL_SETUP_DRAW_COUNT = 9;
+
 export const COLOR_CONFIG: Record<
   CityColor,
   { bg: string; border: string; text: string; label: string }
