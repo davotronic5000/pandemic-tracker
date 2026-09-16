@@ -110,13 +110,13 @@ export function CityConfigModal({
                 placeholder="City name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
               />
               <div className="flex gap-3">
                 <select
                   value={newColor}
                   onChange={(e) => setNewColor(e.target.value as CityColor)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
                 >
                   {COLOR_ORDER.map((color) => (
                     <option key={color} value={color}>
@@ -130,7 +130,7 @@ export function CityConfigModal({
                   max={5}
                   value={newCount}
                   onChange={(e) => setNewCount(Number(e.target.value))}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
                 />
               </div>
               <button
